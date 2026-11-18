@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF0F6" id="themeMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calendar">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<title>Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('cal-theme'); } catch (e) {}
+    if (t !== 'dark' && t !== 'light') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.getElementById('themeMeta');
+    if (m) m.setAttribute('content', t === 'dark' ? '#0F1118' : '#EDF0F6');
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #EDF0F6;
+    --ink: #0F172A;
+    --muted: #7A89A6;
+    --faint: #B2BBCE;
+    --cell-line: #DCE1EB;
+    --head-bg: rgba(120, 135, 170, 0.08);
+    --out-bg: rgba(120, 135, 170, 0.06);
+    --well: rgba(255, 255, 255, 0.55);
+    --lav-d: #6A47E8;
+    --lav-t: rgba(124, 92, 245, 0.1);
+    --on-lav: #FFFFFF;
+    --peach-d: #E0795E;
+    --card-bg: linear-gradient(150deg, #FFFFFF 0%, #EFF2F8 100%);
+    --card-bd: rgba(255, 255, 255, 0.85);
+    --card-sh: 0 30px 50px -20px rgba(33, 48, 92, 0.3), 0 10px 22px -10px rgba(33, 48, 92, 0.14), -8px -8px 18px rgba(255, 255, 255, 0.9), inset 0 1px 0 #fff, inset -2px -3px 5px rgba(120, 135, 170, 0.2);
+    --btn-bg: linear-gradient(160deg, #FFFFFF 0%, #D8DEEA 100%);
+    --btn-sh: 0 8px 14px -4px rgba(33, 48, 92, 0.32), 0 2px 3px rgba(33, 48, 92, 0.12), inset 0 2px 2px rgba(255, 255, 255, 0.95), inset 0 -3px 5px rgba(100, 116, 150, 0.26);
+    --btn-press: inset 0 3px 7px rgba(33, 48, 92, 0.28), inset 0 -1px 0 #fff;
+    --pill-bg: #FFFFFF;
+    --pill-sh: 0 14px 28px -10px rgba(33, 48, 92, 0.26), 0 2px 6px rgba(33, 48, 92, 0.07), inset 0 1px 0 #fff;
+    --today-g: linear-gradient(150deg, #A68BFF 0%, #6A47E8 100%);
+    --today-sh: 0 8px 14px -4px rgba(106, 71, 232, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    --sky-g: linear-gradient(160deg, #EBF4FF, #D2E3FF);
+    --sky-b: #BBD3F8;
+    --sky-d: #2563EB;
+    --tile-g: linear-gradient(150deg, #F7F1FF, #DCCEFB);
+    --tile-b: #D2C4F6;
+    --mint-g: linear-gradient(150deg, #E6F8EF, #CBEEDD);
+    --tile-sh: 0 6px 10px -4px rgba(33, 48, 92, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --t1: #EFE9FF; --t2: #E1EEFF; --t3: #DAF4E8; --t4: #FFE9DE; --t5: #FFE4EE;
+    --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0F1118;
+    --ink: #F2F4FA;
+    --muted: #8793AE;
+    --faint: #4B5268;
+    --cell-line: #2B2F42;
+    --head-bg: rgba(255, 255, 255, 0.04);
+    --out-bg: rgba(255, 255, 255, 0.02);
+    --well: rgba(10, 12, 20, 0.28);
+    --lav-d: #BDB0FF;
+    --lav-t: rgba(160, 146, 250, 0.16);
+    --on-lav: #14102E;
+    --peach-d: #F0A98F;
+    --card-bg: linear-gradient(150deg, #272B3C 0%, #1A1D2A 100%);
+    --card-bd: rgba(255, 255, 255, 0.06);
+    --card-sh: 0 30px 50px -20px rgba(0, 0, 0, 0.75), 0 10px 22px -10px rgba(0, 0, 0, 0.45), -6px -6px 16px rgba(255, 255, 255, 0.025), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset -2px -3px 5px rgba(0, 0, 0, 0.35);
+    --btn-bg: linear-gradient(160deg, #363B53 0%, #222638 100%);
+    --btn-sh: 0 8px 14px -4px rgba(0, 0, 0, 0.6), 0 2px 3px rgba(0, 0, 0, 0.4), inset 0 1.5px 1px rgba(255, 255, 255, 0.14), inset 0 -3px 5px rgba(0, 0, 0, 0.35);
+    --btn-press: inset 0 3px 7px rgba(0, 0, 0, 0.55);
+    --pill-bg: linear-gradient(160deg, #2B3045, #1E2231);
+    --pill-sh: 0 14px 28px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --today-g: linear-gradient(150deg, #BCA9FF 0%, #8566F6 100%);
+    --today-sh: 0 8px 16px -4px rgba(133, 102, 246, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    --sky-g: linear-gradient(160deg, rgba(96, 150, 255, 0.3), rgba(96, 150, 255, 0.16));
+    --sky-b: rgba(120, 170, 255, 0.38);
+    --sky-d: #9CC4FF;
+    --tile-g: linear-gradient(150deg, #3B3463, #292447);
+    --tile-b: #4A4181;
+    --mint-g: linear-gradient(150deg, rgba(90, 210, 160, 0.28), rgba(90, 210, 160, 0.14));
+    --tile-sh: 0 6px 10px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --t1: rgba(160, 146, 250, 0.18); --t2: rgba(110, 170, 255, 0.18); --t3: rgba(90, 210, 160, 0.16); --t4: rgba(255, 160, 125, 0.16); --t5: rgba(255, 130, 175, 0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: var(--font); background: var(--bg); color: var(--ink);
+    display: grid; place-items: center; min-height: 100dvh;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; overscroll-behavior: none;
+    transition: background-color .3s, color .3s;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; touch-action: manipulation; }
+  button:focus-visible { outline: 2px solid var(--sky-d); outline-offset: 3px; }
+  svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .app { width: min(100%, 600px); display: flex; flex-direction: column; gap: clamp(16px, 3vw, 24px); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+  /* Header */
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-inline: 4px; }
+  .title { display: inline-flex; align-items: center; gap: 8px; padding: 4px 8px; margin-left: -8px; border-radius: 16px; transition: background .2s; }
+  @media (hover: hover) { .title:hover { background: var(--lav-t); } }
+  .tt { display: flex; align-items: baseline; gap: 10px; letter-spacing: -0.03em; }
+  .month { font-size: clamp(25px, 7vw, 34px); font-weight: 800; line-height: 1.1; }
+  .year { font-size: clamp(25px, 7vw, 34px); font-weight: 700; color: var(--muted); line-height: 1.1; }
+  .caret { width: 15px; height: 15px; color: var(--lav-d); flex: none; transition: transform .25s; }
+  .title[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .tools { display: flex; align-items: center; gap: 10px; flex: none; }
+  .round { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--btn-bg); box-shadow: var(--btn-sh); display: grid; place-items: center; transition: transform .15s, box-shadow .15s; }
+  .round:active { transform: translateY(1px); box-shadow: var(--btn-press); }
+  .round svg { width: 19px; height: 19px; }
+  .pill-btn { height: 44px; padding: 0 20px; border-radius: 999px; background: var(--pill-bg); box-shadow: var(--pill-sh); color: var(--lav-d); font-size: 14px; font-weight: 700; transition: transform .15s; }
+  .pill-btn:active { transform: translateY(1px); }
+
+  /* Card */
+  .card { background: var(--card-bg); border: 1px solid var(--card-bd); box-shadow: var(--card-sh); border-radius: 36px; padding: clamp(14px, 3.6vw, 22px); transition: background .3s; }
+  .stage { display: grid; touch-action: pan-y; }
+  .view { grid-area: 1 / 1; min-height: 0; transition: opacity .22s ease, visibility .22s; }
+  .view.off { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  .cal-table { border: 1px solid var(--cell-line); border-radius: 24px; overflow: hidden; background: var(--well); }
+  .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--head-bg); border-bottom: 1px solid var(--cell-line); }
+  .weekdays span { text-align: center; padding: 12px 0; font-size: 12px; font-weight: 700; letter-spacing: 0.01em; color: var(--muted); border-right: 1px solid var(--cell-line); }
+  .weekdays span:last-child { border-right: 0; }
+  .weekdays span.we { color: var(--peach-d); }
+  .grid-wrap { overflow: hidden; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); }
+  .day { height: clamp(54px, 12vw, 80px); display: grid; place-items: start center; padding-top: 9px; border-right: 1px solid var(--cell-line); border-bottom: 1px solid var(--cell-line); }
+  .day:nth-child(7n) { border-right: 0; }
+  .day:nth-last-child(-n+7) { border-bottom: 0; }
+  .day .num { width: clamp(32px, 8.5vw, 38px); height: clamp(32px, 8.5vw, 38px); border: 1px solid transparent; border-radius: 50%; display: grid; place-items: center; font-size: clamp(14px, 3.6vw, 16px); font-weight: 600; letter-spacing: -0.01em; transition: background .18s, color .18s; }
+  @media (hover: hover) { .day:hover .num { background: var(--lav-t); } }
+  .day:active .num { background: var(--lav-t); }
+  .day.out { background: var(--out-bg); }
+  .day.out .num { color: var(--faint); font-weight: 500; }
+  .day.sel .num { background: var(--sky-g); border-color: var(--sky-b); color: var(--sky-d); font-weight: 700; }
+  .day.today .num { background: var(--today-g); color: var(--on-lav); font-weight: 800; box-shadow: var(--today-sh); }
+  .day.today.sel .num { outline: 2px solid var(--sky-b); outline-offset: 2px; }
+  .day:focus-visible { outline: none; }
+  .day:focus-visible .num { outline: 2px solid var(--sky-d); outline-offset: 2px; }
+
+  /* Month picker */
+  .months { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 12px; height: 100%; }
+  .mtile { min-height: 64px; border-radius: 22px; font-size: clamp(15px, 4vw, 17px); font-weight: 700; background: var(--t1); box-shadow: var(--tile-sh); transition: transform .15s, box-shadow .15s; }
+  .mtile:nth-child(5n+2) { background: var(--t2); }
+  .mtile:nth-child(5n+3) { background: var(--t3); }
+  .mtile:nth-child(5n+4) { background: var(--t4); }
+  .mtile:nth-child(5n+5) { background: var(--t5); }
+  .mtile:active { transform: translateY(1px); }
+  .mtile.now { color: var(--lav-d); }
+  .mtile.cur { background: var(--today-g); color: var(--on-lav); box-shadow: var(--today-sh); font-weight: 800; }
+
+  /* Floating date pill */
+  .dock { display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 10px; border-radius: 999px; background: var(--pill-bg); box-shadow: var(--pill-sh); border: 1px solid var(--card-bd); }
+  .badge { width: 44px; height: 44px; flex: none; border-radius: 16px; background: var(--tile-g); border: 1px solid var(--tile-b); color: var(--lav-d); display: grid; place-items: center; box-shadow: var(--tile-sh); }
+  .badge svg { width: 21px; height: 21px; }
+  .text { flex: 1; min-width: 0; }
+  .label { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rel { margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .theme .sun { display: none; }
+  :root[data-theme="dark"] .theme .sun { display: block; }
+  :root[data-theme="dark"] .theme .moon { display: none; }
+  .theme svg { grid-area: 1 / 1; }
+
+  @media (min-width: 768px) { .day { height: 84px; } }
+
+  /* Phone: full-screen app layout */
+  @media (max-width: 640px) {
+    body { display: block; padding: 0; }
+    .app { width: 100%; height: 100vh; height: 100dvh; gap: 14px; overflow-y: auto; overscroll-behavior: contain;
+      padding: calc(env(safe-area-inset-top) + 12px) max(14px, env(safe-area-inset-left)) calc(env(safe-area-inset-bottom) + 12px) max(14px, env(safe-area-inset-right)); }
+    .bar { flex: none; flex-wrap: nowrap; }
+    .tt { flex-direction: column; align-items: flex-start; gap: 0; }
+    .year { font-size: 14px; letter-spacing: 0; }
+    .month { font-size: clamp(25px, 7.4vw, 30px); }
+    .tools { gap: 8px; }
+    .round { width: 42px; height: 42px; }
+    .pill-btn { height: 42px; padding: 0 16px; }
+    .card { flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: 30px; padding: 12px; }
+    .stage { flex: 1; min-height: 0; }
+    #monthView { display: flex; flex-direction: column; }
+    .cal-table { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .grid-wrap { flex: 1; min-height: 272px; display: flex; }
+    .grid { flex: 1; }
+    .day { height: auto; min-height: 44px; padding-top: clamp(5px, 1.2dvh, 10px); }
+    .day .num { width: 38px; height: 38px; font-size: 16px; }
+    .mtile { min-height: 60px; }
+    .dock { flex: none; }
+  }
+  @media (max-width: 400px) { .caret { display: none; } }
+  @media (max-width: 900px) and (max-height: 520px) and (orientation: landscape) { .app { height: auto; min-height: 100dvh; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<main class="app" aria-label="Calendar">
+  <header class="bar">
+    <button class="title" id="titleBtn" aria-expanded="false" aria-label="Choose month and year">
+      <span class="tt"><span class="month" id="monthName"></span><span class="year" id="yearNum"></span></span>
+      <svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="tools">
+      <button class="round" id="prev" aria-label="Previous month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="pill-btn" id="today">Today</button>
+      <button class="round" id="next" aria-label="Next month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="stage" id="stage">
+      <section class="view" id="monthView">
+        <div class="cal-table">
+          <div class="weekdays" id="weekdays" aria-hidden="true"></div>
+          <div class="grid-wrap"><div class="grid" id="grid" role="group" aria-label="Dates"></div></div>
+        </div>
+      </section>
+      <section class="view off" id="pickerView" aria-label="Choose month">
+        <div class="months" id="months"></div>
+      </section>
+    </div>
+  </section>
+
+  <footer class="dock">
+    <div class="badge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    </div>
+    <div class="text">
+      <div class="label" id="selLabel"></div>
+      <div class="rel" id="selRel"></div>
+    </div>
+    <button class="round theme" id="themeBtn" aria-label="Switch to dark mode">
+      <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+    </button>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = { title: $('titleBtn'), month: $('monthName'), year: $('yearNum'), prev: $('prev'), next: $('next'),
+    today: $('today'), grid: $('grid'), weekdays: $('weekdays'), months: $('months'),
+    monthView: $('monthView'), pickerView: $('pickerView'), label: $('selLabel'), rel: $('selRel') };
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const monthLong = new Intl.DateTimeFormat(undefined, { month: 'long' });
+  const monthShort = new Intl.DateTimeFormat(undefined, { month: 'short' });
+  const weekdayShort = new Intl.DateTimeFormat(undefined, { weekday: 'short' });
+  const fullDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const monthKey = (d) => d.getFullYear() * 12 + d.getMonth();
+  const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
+
+  let today = startOfDay(new Date());
+  const state = {
+    sel: today,
+    view: new Date(today.getFullYear(), today.getMonth(), 1),
+    mode: 'month',
+    pickerYear: today.getFullYear()
+  };
+
+  /* Weekday header (Sunday first) */
+  for (let i = 0; i < 7; i++) {
+    const s = document.createElement('span');
+    s.textContent = weekdayShort.format(new Date(2023, 0, 1 + i));
+    if (i === 0 || i === 6) s.className = 'we';
+    el.weekdays.appendChild(s);
+  }
+
+  function relativeLabel(d) {
+    const n = Math.round((d - today) / 864e5);
+    if (n === 0) return 'Today';
+    if (n === 1) return 'Tomorrow';
+    if (n === -1) return 'Yesterday';
+    return n > 0 ? `In ${n} days` : `${-n} days ago`;
+  }
+
+  function renderHeader() {
+    const picker = state.mode === 'picker';
+    el.month.textContent = picker ? state.pickerYear : monthLong.format(state.view);
+    el.year.textContent = picker ? '' : state.view.getFullYear();
+    el.title.setAttribute('aria-expanded', picker);
+    el.prev.setAttribute('aria-label', picker ? 'Previous year' : 'Previous month');
+    el.next.setAttribute('aria-label', picker ? 'Next year' : 'Next month');
+    el.label.textContent = fullDate.format(state.sel);
+    el.rel.textContent = relativeLabel(state.sel);
+  }
+
+  function renderGrid(dir = 0, focus = false) {
+    const y = state.view.getFullYear(), m = state.view.getMonth();
+    const offset = new Date(y, m, 1).getDay();
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(y, m, 1 - offset + i);
+      const b = document.createElement('button');
+      const cls = ['day'];
+      if (d.getMonth() !== m) cls.push('out');
+      if (d.getDay() === 0 || d.getDay() === 6) cls.push('we');
+      const isSel = sameDay(d, state.sel), isToday = sameDay(d, today);
+      if (isSel) cls.push('sel');
+      if (isToday) { cls.push('today'); b.setAttribute('aria-current', 'date'); }
+      b.className = cls.join(' ');
+      b.type = 'button';
+      b.dataset.t = d.getTime();
+      b.tabIndex = isSel ? 0 : -1;
+      b.setAttribute('aria-pressed', isSel);
+      b.setAttribute('aria-label', fullDate.format(d));
+      b.innerHTML = `<span class="num">${d.getDate()}</span>`;
+      frag.appendChild(b);
+    }
+    el.grid.replaceChildren(frag);
+    if (!el.grid.querySelector('[tabindex="0"]')) {
+      const first = [...el.grid.children].find((c) => !c.classList.contains('out'));
+      if (first) first.tabIndex = 0;
+    }
+    if (dir && !reduce.matches) {
+      el.grid.animate(
+        [{ opacity: 0, transform: `translateX(${dir * 18}px)` }, { opacity: 1, transform: 'translateX(0)' }],
+        { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' }
+      );
+    }
+    if (focus) {
+      const t = el.grid.querySelector('[tabindex="0"]');
+      if (t) t.focus({ preventScroll: true });
+    }
+  }
+
+  function renderMonths() {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 12; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mtile';
+      b.dataset.m = i;
+      b.textContent = monthShort.format(new Date(2000, i, 1));
+      b.setAttribute('aria-label', `${monthLong.format(new Date(2000, i, 1))} ${state.pickerYear}`);
+      if (state.pickerYear === today.getFullYear() && i === today.getMonth()) b.classList.add('now');
+      if (state.pickerYear === state.view.getFullYear() && i === state.view.getMonth()) {
+        b.classList.add('cur');
+        b.setAttribute('aria-current', 'true');
+      }
+      frag.appendChild(b);
+    }
+    el.months.replaceChildren(frag);
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    if (mode === 'picker') { state.pickerYear = state.view.getFullYear(); renderMonths(); }
+    el.monthView.classList.toggle('off', mode === 'picker');
+    el.pickerView.classList.toggle('off', mode !== 'picker');
+    el.monthView.inert = mode === 'picker';
+    el.pickerView.inert = mode !== 'picker';
+    renderHeader();
+  }
+
+  function goToMonth(date, { focus = false } = {}) {
+    const next = new Date(date.getFullYear(), date.getMonth(), 1);
+    const dir = Math.sign(monthKey(next) - monthKey(state.view));
+    state.view = next;
+    renderHeader();
+    renderGrid(dir, focus);
+  }
+
+  function select(d, { focus = false } = {}) {
+    state.sel = startOfDay(d);
+    if (monthKey(state.sel) !== monthKey(state.view)) goToMonth(state.sel, { focus });
+    else { renderHeader(); renderGrid(0, focus); }
+  }
+
+  function step(n) {
+    if (state.mode === 'picker') {
+      state.pickerYear += n;
+      renderMonths();
+      renderHeader();
+    } else {
+      goToMonth(new Date(state.view.getFullYear(), state.view.getMonth() + n, 1));
+    }
+  }
+
+  /* Events */
+  el.prev.addEventListener('click', () => step(-1));
+  el.next.addEventListener('click', () => step(1));
+  el.title.addEventListener('click', () => setMode(state.mode === 'picker' ? 'month' : 'picker'));
+  el.today.addEventListener('click', () => {
+    today = startOfDay(new Date());
+    if (state.mode === 'picker') setMode('month');
+    state.sel = today;
+    goToMonth(today);
+  });
+
+  el.grid.addEventListener('click', (e) => {
+    const b = e.target.closest('.day');
+    if (b) select(new Date(+b.dataset.t));
+  });
+
+  el.grid.addEventListener('keydown', (e) => {
+    const s = state.sel;
+    let next = null;
+    switch (e.key) {
+      case 'ArrowLeft': next = new Date(s.getFullYear(), s.getMonth(), s.getDate() - 1); break;
+      case 'ArrowRight': next = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 1); break;
+      case 'ArrowUp': next = new Date(s.getFullYear(), s.getMonth(), s.getDate() - 7); break;
+      case 'ArrowDown': next = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 7); break;
+      case 'PageUp':
+      case 'PageDown': {
+        const t = new Date(s.getFullYear(), s.getMonth() + (e.key === 'PageUp' ? -1 : 1), 1);
+        next = new Date(t.getFullYear(), t.getMonth(), Math.min(s.getDate(), daysIn(t.getFullYear(), t.getMonth())));
+        break;
+      }
+    }
+    if (next) { e.preventDefault(); select(next, { focus: true }); }
+  });
+
+  el.months.addEventListener('click', (e) => {
+    const b = e.target.closest('.mtile');
+    if (!b) return;
+    const target = new Date(state.pickerYear, +b.dataset.m, 1);
+    setMode('month');
+    goToMonth(target);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.mode === 'picker') setMode('month');
+  });
+
+  /* Keep "today" accurate: exact midnight timer plus safety checks */
+  const refreshToday = () => {
+    const now = startOfDay(new Date());
+    if (sameDay(now, today)) return;
+    const prev = today;
+    const viewingPrevMonth = monthKey(state.view) === monthKey(prev);
+    today = now;
+    if (sameDay(state.sel, prev)) {
+      state.sel = today;
+      if (viewingPrevMonth) state.view = new Date(today.getFullYear(), today.getMonth(), 1);
+    }
+    renderHeader();
+    renderGrid();
+    if (state.mode === 'picker') renderMonths();
+  };
+  let midnightTimer;
+  const scheduleMidnight = () => {
+    clearTimeout(midnightTimer);
+    const n = new Date();
+    const next = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1, 0, 0, 1);
+    midnightTimer = setTimeout(() => { refreshToday(); scheduleMidnight(); }, next - n);
+  };
+  const resync = () => { refreshToday(); scheduleMidnight(); };
+  scheduleMidnight();
+  setInterval(refreshToday, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resync(); });
+  window.addEventListener('focus', resync);
+  window.addEventListener('pageshow', resync);
+
+  /* Swipe left / right to change month (or year in the picker) */
+  let sx = 0, sy = 0, swiping = false;
+  const stage = $('stage');
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) { swiping = false; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
+  }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    if (!swiping) return;
+    swiping = false;
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.6) step(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  /* Theme */
+  const root = document.documentElement, themeBtn = $('themeBtn');
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const saved = () => { try { return localStorage.getItem('cal-theme'); } catch (e) { return null; } };
+  const setTheme = (t) => {
+    root.setAttribute('data-theme', t);
+    const meta = $('themeMeta');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#0F1118' : '#EDF0F6');
+    themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  };
+  setTheme(root.getAttribute('data-theme') || 'light');
+  themeBtn.addEventListener('click', () => {
+    const t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(t);
+    try { localStorage.setItem('cal-theme', t); } catch (e) {}
+  });
+  mq.addEventListener('change', (e) => { if (!saved()) setTheme(e.matches ? 'dark' : 'light'); });
+
+  renderHeader();
+  renderGrid();
+})();
+</script>
+</body>
+</html>
